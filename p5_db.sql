@@ -15,16 +15,6 @@ CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
 USE `mydb` ;
 
 -- -----------------------------------------------------
--- Table `mydb`.`Orders`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`Orders` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `order_date` DATETIME NOT NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `mydb`.`Clients`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`Clients` (
@@ -32,6 +22,24 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Clients` (
   `full_name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Orders`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Orders` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `client_id` INT UNSIGNED NOT NULL,
+  `order_date` DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_client_id`
+    FOREIGN KEY (`client_id`)
+    REFERENCES `mydb`.`Clients` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+CREATE INDEX `fk_client_id_idx` ON `mydb`.`Orders` (`client_id` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -65,28 +73,6 @@ CREATE TABLE IF NOT EXISTS `mydb`.`OrderProduct` (
 ENGINE = InnoDB;
 
 CREATE INDEX `fk_products_idx` ON `mydb`.`OrderProduct` (`product_id` ASC) VISIBLE;
-
-
--- -----------------------------------------------------
--- Table `mydb`.`OrderClient`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`OrderClient` (
-  `order_id` INT UNSIGNED NOT NULL,
-  `client_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`order_id`, `client_id`),
-  CONSTRAINT `fk_orders`
-    FOREIGN KEY (`order_id`)
-    REFERENCES `mydb`.`Orders` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_clients`
-    FOREIGN KEY (`client_id`)
-    REFERENCES `mydb`.`Clients` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-CREATE INDEX `fk_clients_idx` ON `mydb`.`OrderClient` (`client_id` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -139,18 +125,18 @@ CREATE INDEX `fk_city_idx` ON `mydb`.`Streets` (`city_id` ASC) VISIBLE;
 -- Table `mydb`.`AddressBook`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`AddressBook` (
-  `order_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `client_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `street_id` INT UNSIGNED NOT NULL,
   `apt_number` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`order_id`, `street_id`),
+  PRIMARY KEY (`client_id`, `street_id`),
   CONSTRAINT `fk_street`
     FOREIGN KEY (`street_id`)
     REFERENCES `mydb`.`Streets` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_client`
-    FOREIGN KEY (`order_id`)
-    REFERENCES `mydb`.`Orders` (`id`)
+    FOREIGN KEY (`client_id`)
+    REFERENCES `mydb`.`Clients` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
